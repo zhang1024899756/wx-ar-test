@@ -1,18 +1,15 @@
 <!--index.wxml-->
-<view>
-    <!--WebGL层-->
-    <canvas 
-      type="webgl" 
-      id="webgl" 
-      canvas-id="webgl" 
-      style="position:fixed;top:0;width:{{canvasWidth}}px;height:{{canvasHeight}}px;z-index:1;">
-    </canvas>
-    <!--摄像头层-->
-    <camera 
-      mode="normal" 
-      device-position="back" 
-      flash="auto" 
-      frame-size="medium"
-      style="position:fixed;top:0;width:100%;height:100%;z-index:0;">
-    </camera>
+<view class="container">
+  <view class="userinfo">
+    <button wx:if="{{!hasUserInfo && canIUse}}" open-type="getUserInfo" bindgetuserinfo="getUserInfo"> 获取头像昵称 </button>
+    <block wx:else>
+      <image class="userinfo-avatar" src="{{userInfo.avatarUrl}}" mode="cover"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName}}</text>
+      <button bindtap="toAr" style="margin-top: 40rpx;" wx:if="{{hasUserInfo}}"> 体验AR场景渲染 </button>
+    </block>
   </view>
+  <view class="usermotto">
+    <text class="user-motto">{{motto}}</text>
+  </view>
+</view>
+

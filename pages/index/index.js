@@ -1,112 +1,55 @@
 //index.js
 //获取应用实例
-//导入three.js库
-import * as THREE from "../../utils/three.js";
 const app = getApp();
 
 Page({
   data: {
-    canvasWidth: 0,
-    canvasHeight: 0,
+    motto: "先获取您的一些基本信息，才可以继续",
+    userInfo: {},
+    hasUserInfo: false,
+    canIUse: wx.canIUse("button.open-type.getUserInfo"),
+  },
+  //事件处理函数
+  toAr: function () {
+    wx.navigateTo({ url: "/pages/ar/index" });
   },
   onLoad: function () {
-    //初始化Canvas对象
-    this.initWebGLCanvas();
-  },
-
-  //初始化Canvas对象
-  initWebGLCanvas() {
-    //获取页面上的标签id为webgl的对象，从而获取到canvas对象
-    let query = wx.createSelectorQuery();
-    query
-      .select("#webgl")
-      .node()
-      .exec((res) => {
-        var canvas = res[0].node;
-        this._webGLCanvas = canvas;
-        //获取系统信息，包括屏幕分辨率，显示区域大小，像素比等
-        var info = wx.getSystemInfoSync();
-        this._sysInfo = info;
-        //设置canvas的大小，这里需要用到窗口大小与像素比乘积来定义
-        this._webGLCanvas.width =
-          this._sysInfo.windowWidth * this._sysInfo.pixelRatio;
-        this._webGLCanvas.height =
-          this._sysInfo.windowHeight * this._sysInfo.pixelRatio;
-        //设置canvas的样式
-        this._webGLCanvas.style = {};
-        this._webGLCanvas.style.width = this._webGLCanvas.width.width;
-        this._webGLCanvas.style.height = this._webGLCanvas.width.height;
-        //设置显示层canvas绑定的样式style数据，页面层则直接用窗口大小来定义
-        this.setData({
-          canvasWidth: this._sysInfo.windowWidth,
-          canvasHeight: this._sysInfo.windowHeight,
-        });
-        // 初始化WebGL场景
-        this.initWebGLScene();
+    wx.setNavigationBarTitle({ title: "AR场景测试" });
+    if (app.globalData.userInfo) {
+      this.setData({
+        userInfo: app.globalData.userInfo,
+        hasUserInfo: true,
       });
+    } else if (this.data.canIUse) {
+      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
+      // 所以此处加入 callback 以防止这种情况
+      app.userInfoReadyCallback = (res) => {
+        this.setData({
+          userInfo: res.userInfo,
+          hasUserInfo: true,
+        });
+      };
+    } else {
+      // 在没有 open-type=getUserInfo 版本的兼容处理
+      wx.getUserInfo({
+        success: (res) => {
+          app.globalData.userInfo = res.userInfo;
+          this.setData({
+            userInfo: res.userInfo,
+            hasUserInfo: true,
+            motto: "欢迎您",
+          });
+        },
+      });
+    }
   },
-
-  // 初始化WebGL场景
-  initWebGLScene() {
-    //创建摄像头
-    var camera = new THREE.PerspectiveCamera(
-      60,
-      this._webGLCanvas.width / this._webGLCanvas.height,
-      1,
-      1000
-    );
-    this._camera = camera;
-    //创建场景
-    var scene = new THREE.Scene();
-    this._scene = scene;
-
-    //创建Cube几何体
-    var cubeGeo = new THREE.CubeGeometry(30, 30, 30);
-    //创建材质，设置材质为基本材质（不会反射光线，设置材质颜色为绿色）
-    var mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    //创建Cube的Mesh对象
-    var cube = new THREE.Mesh(cubeGeo, mat);
-    //设置Cube对象的位置
-    cube.position.set(0, 0, -100);
-    //将Cube加入到场景中
-    this._scene.add(cube);
-
-    //创建渲染器,指定渲染器背景透明
-    var renderer = new THREE.WebGLRenderer({
-      canvas: this._webGLCanvas,
-      alpha: true,
-    });
-    //设置渲染器大小
-    this._renderer = renderer;
-    this._renderer.setSize(this._webGLCanvas.width, this._webGLCanvas.height);
-    this._renderer.setPixelRatio(app.globalData.devicePixelRatio)
-    //记录当前时间
-    var lastTime = Date.now();
-    this._lastTime = lastTime;
-    //开始渲染
-    this.renderWebGL(cube);
-  },
-
-  // 渲染函数
-  renderWebGL(cube) {
-    //获取当前一帧的时间
-    var now = Date.now();
-    //计算时间间隔,由于Date对象返回的时间是毫秒，所以除以1000得到单位为秒的时间间隔
-    var duration = (now - this._lastTime) / 1000;
-    //打印帧率
-    //console.log(1 / duration + "FPS");
-    //重新赋值上一帧时间
-    this._lastTime = now;
-    //旋转Cube对象，这里希望每秒钟Cube对象沿着Y轴旋转180度（Three.js中用弧度标是，所以是Math.PI）
-    // 通过回调里面的递归重复执行自定义渲染来改变Y轴的角度，达到动态旋转效果
-    cube.rotation.y += (duration * Math.PI) / 3;
-    //cube.rotation.y = 100;
-
-    //渲染执行场景，指定摄像头看到的画面
-    this._renderer.render(this._scene, this._camera);
-    //设置帧回调函数，并且每一帧调用自定义的渲染函数
-    this._webGLCanvas.requestAnimationFrame(() => {
-      this.renderWebGL(cube);
+  getUserInfo: function (e) {
+    console.log(e);
+    app.globalData.userInfo = e.detail.userInfo;
+    this.setData({
+      userInfo: e.detail.userInfo,
+      hasUserInfo: true,
+      motto: "欢迎您",
     });
   },
 });
