@@ -21,11 +21,6 @@ Page({
 
   onUnload: function () {
     THREE.global.unregisterCanvas(this.data.canvasId)
-    // this._controls = null
-    // this._webGLCanvas = null
-    // this._camera = null
-    // this._scene = null
-    // this._renderer = null
   },
 
   //初始化Canvas对象
@@ -58,10 +53,11 @@ Page({
         controls.update();
         const geometry = new THREE.BoxBufferGeometry(200, 200, 200);
       
-        const texture = new THREE.TextureLoader().load(this.data.userInfo.avatarUrl);
-        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const texture = new THREE.TextureLoader().load(this.data.userInfo.avatarUrl)
+        texture.minFilter = THREE.LinearFilter
+        //const material = new THREE.MeshBasicMaterial({ map: texture });
       
-        // const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
+        const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 })
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
       
